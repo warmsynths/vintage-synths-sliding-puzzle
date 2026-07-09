@@ -75,6 +75,98 @@ export class SlidingPuzzle extends LitElement {
       color: var(--accent-cyan);
       text-shadow: var(--shadow-glow-cyan);
       text-transform: uppercase;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .active-synth-name.minimoog {
+      font-family: 'BioRhyme', serif;
+      font-weight: 800;
+      color: #f5a623;
+      text-shadow: 0 0 12px rgba(245, 166, 35, 0.4);
+      text-transform: capitalize;
+    }
+
+    .active-synth-name.arpodysseymkiii {
+      font-family: 'Syncopate', sans-serif;
+      font-weight: 700;
+      color: #ff5200;
+      text-shadow: 0 0 12px rgba(255, 82, 0, 0.5);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .active-synth-name.dx7 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      color: #00f5d4;
+      text-shadow: 0 0 12px rgba(0, 245, 212, 0.5);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .active-synth-name.juno60 {
+      font-family: 'Syncopate', sans-serif;
+      font-weight: 700;
+      font-style: italic;
+      color: #ff2a4b;
+      text-shadow: 0 0 12px rgba(255, 42, 75, 0.5);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .active-synth-name.tb303 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-style: italic;
+      color: #39ff14;
+      text-shadow: 0 0 12px rgba(57, 255, 20, 0.5);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .active-synth-name.tr808 {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 900;
+      color: #ff6b00;
+      text-shadow: 0 0 12px rgba(255, 107, 0, 0.5);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .active-synth-name.tr909 {
+      font-family: 'Syncopate', sans-serif;
+      font-weight: 700;
+      color: #e2e2e8;
+      text-shadow: 0 0 12px rgba(226, 226, 232, 0.3);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .active-synth-name.cz1 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-style: italic;
+      color: #00bcff;
+      text-shadow: 0 0 12px rgba(0, 188, 255, 0.5);
+      text-transform: uppercase;
+    }
+
+    .active-synth-name.mpc60 {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 800;
+      color: #ded6c5;
+      text-shadow: 0 0 12px rgba(222, 214, 197, 0.3);
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+    }
+
+    .active-synth-name.sp1200 {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 900;
+      font-style: italic;
+      color: #4b7bec;
+      text-shadow: 0 0 12px rgba(75, 123, 236, 0.5);
+      text-transform: uppercase;
     }
 
     .stats {
@@ -1229,7 +1321,7 @@ export class SlidingPuzzle extends LitElement {
     return html`
       <div class="header-panel">
         <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-          <div class="active-synth-name">${this.activeImage.name}</div>
+          <div class="active-synth-name ${this.activeImage.id}">${this.activeImage.name}</div>
           <div class="order-btn-wrapper" title="Posters coming soon!">
             <span class="btn-order-poster" style="cursor: default;">
               Posters Coming Soon

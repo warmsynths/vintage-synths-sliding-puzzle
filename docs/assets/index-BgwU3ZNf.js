@@ -39,7 +39,7 @@
  */function Be(r,e){return(t,i,s)=>{const o=n=>{var a;return((a=n.renderRoot)==null?void 0:a.querySelector(r))??null};return He(t,i,{get(){return o(this)}})}}var Le=Object.defineProperty,We=Object.getOwnPropertyDescriptor,b=(r,e,t,i)=>{for(var s=i>1?void 0:i?We(e,t):e,o=r.length-1,n;o>=0;o--)(n=r[o])&&(s=(i?n(e,t,s):n(s))||s);return i&&s&&Le(e,t,s),s};const V=[{id:"minimoog",name:"Minimoog",url:"./assets/minimoog.png"},{id:"arpodysseymkiii",name:"ARP Odyssey Mk III",url:"./assets/arpodysseymkiii.png"},{id:"dx7",name:"Yamaha DX7",url:"./assets/dx7.png"},{id:"juno60",name:"Roland Juno-60",url:"./assets/juno60.png"},{id:"tb303",name:"Roland TB-303",url:"./assets/tb303.png"},{id:"tr808",name:"Roland TR-808",url:"./assets/tr808.png"},{id:"tr909",name:"Roland TR-909",url:"./assets/tr909.png"},{id:"cz1",name:"Casio CZ-1",url:"./assets/cz1.png"},{id:"mpc60",name:"Akai MPC60",url:"./assets/mpc60.png"},{id:"sp1200",name:"E-mu SP-1200",url:"./assets/sp1200.png"}];let f=class extends I{constructor(){super(...arguments),this.gridSize=3,this.activeImage=V[0],this.tiles=[],this.blankIndex=8,this.moves=0,this.secondsElapsed=0,this.isPlaying=!1,this.hasWon=!1,this.showPreview=!1,this.isSolving=!1,this.gameMode="freeplay",this.hasMoved=!1,this.dragTile=null,this.dragElement=null,this.startX=0,this.startY=0,this.allowedDragDirection=null,this.maxDragDistance=0,this._boundPointerMove=r=>this.handlePointerMove(r),this._boundPointerUp=r=>this.handlePointerUp(r)}connectedCallback(){super.connectedCallback(),this.resetPuzzle()}disconnectedCallback(){super.disconnectedCallback(),this.stopTimer()}updated(r){(r.has("gridSize")||r.has("activeImage"))&&this.resetPuzzle()}startTimer(){this.stopTimer(),this.secondsElapsed=0,this.timerInterval=window.setInterval(()=>{this.secondsElapsed++},1e3)}stopTimer(){this.timerInterval&&(clearInterval(this.timerInterval),this.timerInterval=void 0)}formatTime(r){const e=Math.floor(r/60),t=r%60;return`${e}:${t.toString().padStart(2,"0")}`}triggerHaptic(){if("vibrate"in navigator)try{navigator.vibrate(10)}catch{}}setMode(r){this.gameMode!==r&&(this.gameMode=r,this.resetPuzzle())}resetPuzzle(){this.stopTimer(),this.isSolving=!1,this.secondsElapsed=0,this.moves=0,this.isPlaying=!1,this.hasWon=!1,this.showPreview=!1;const r=this.gridSize,e=r*r,t=[];for(let i=0;i<e;i++)t.push({id:i,currentIndex:i});this.tiles=t,this.blankIndex=e-1}shufflePuzzle(){this.resetPuzzle();const r=this.gridSize;let e=r*r-1;const t=[...this.tiles];let i=-1;const s=r*r*25;for(let o=0;o<s;o++){const n=this.getNeighbors(e,r),a=n.filter(d=>{var p;return((p=t.find(g=>g.currentIndex===d))==null?void 0:p.id)!==i}),l=a.length>0?a[Math.floor(Math.random()*a.length)]:n[Math.floor(Math.random()*n.length)],c=t.find(d=>d.currentIndex===l),h=t.find(d=>d.id===r*r-1);i=c.id,c.currentIndex=e,h.currentIndex=l,e=l}this.tiles=t,this.blankIndex=e,this.isPlaying=!0,this.startTimer()}getNeighbors(r,e){const t=Math.floor(r/e),i=r%e,s=[];return t>0&&s.push(r-e),t<e-1&&s.push(r+e),i>0&&s.push(r-1),i<e-1&&s.push(r+1),s}checkWinState(){const r=this.tiles.every(e=>e.id===e.currentIndex);return r&&this.isPlaying&&(this.isPlaying=!1,this.stopTimer(),this.hasWon=!0,this.triggerHaptic()),r}handlePointerDown(r,e){if(!(this.gameMode==="freeplay"||this.gameMode==="play"&&this.isPlaying)||this.isSolving||this.hasWon)return;r.preventDefault();const i=this.gridSize,s=e.currentIndex,o=this.blankIndex,n=Math.floor(s/i),a=s%i,l=Math.floor(o/i),c=o%i;if(!(Math.abs(n-l)===1&&a===c||Math.abs(a-c)===1&&n===l))return;const d=r.currentTarget;this.dragTile=e,this.dragElement=d,this.startX=r.clientX,this.startY=r.clientY,this.hasMoved=!1,n===l?this.allowedDragDirection=c>a?"right":"left":this.allowedDragDirection=l>n?"down":"up";const p=d.getBoundingClientRect(),g=parseFloat(getComputedStyle(this.gridElement).gap||"0");this.allowedDragDirection==="left"||this.allowedDragDirection==="right"?this.maxDragDistance=p.width+g:this.maxDragDistance=p.height+g,window.addEventListener("pointermove",this._boundPointerMove),window.addEventListener("pointerup",this._boundPointerUp),window.addEventListener("pointercancel",this._boundPointerUp),d.style.transition="none",d.style.zIndex="10"}handlePointerMove(r){if(!this.dragTile||!this.dragElement)return;const e=r.clientX-this.startX,t=r.clientY-this.startY;(Math.abs(e)>4||Math.abs(t)>4)&&(this.hasMoved=!0);let i=0,s=0;const o=this.maxDragDistance;this.allowedDragDirection==="right"?i=Math.max(0,Math.min(o,e)):this.allowedDragDirection==="left"?i=Math.min(0,Math.max(-o,e)):this.allowedDragDirection==="down"?s=Math.max(0,Math.min(o,t)):this.allowedDragDirection==="up"&&(s=Math.min(0,Math.max(-o,t))),this.dragElement.style.transform=`translate3d(${i}px, ${s}px, 0)`}handlePointerUp(r){if(!this.dragTile||!this.dragElement)return;const e=this.dragElement,t=this.dragTile,i=this.gridSize;window.removeEventListener("pointermove",this._boundPointerMove),window.removeEventListener("pointerup",this._boundPointerUp),window.removeEventListener("pointercancel",this._boundPointerUp);const o=e.style.transform.match(/translate3d\(([^px]+)px,\s*([^px]+)px/);let n=0;if(o){const c=parseFloat(o[1]),h=parseFloat(o[2]);n=Math.max(Math.abs(c),Math.abs(h))}const a=this.maxDragDistance*.35,l=(n>=a||!this.hasMoved)&&r.type!=="pointercancel";if(e.style.transition="transform 0.15s ease-out",l){const c=this.blankIndex,h=t.currentIndex,d=this.tiles.find(p=>p.id===i*i-1);t.currentIndex=c,d.currentIndex=h,this.blankIndex=h,this.moves++,this.triggerHaptic(),this.tiles=[...this.tiles],e.style.transform="",e.style.zIndex="",this.checkWinState()}else e.style.transform="translate3d(0, 0, 0)",setTimeout(()=>{e.style.zIndex=""},150);this.dragTile=null,this.dragElement=null,this.allowedDragDirection=null}async runSolver(r){var s,o;if(!this.isPlaying||this.hasWon||this.isSolving)return;this.isSolving=!0;const e=this.gridSize,t=this.getBoardArray();if(e>3){const n=this.getGreedyBestMove(t,e);if(n!==null)if(r){let a=[...t];const l=[];let c=new Set;c.add(a.join(","));for(let h=0;h<40;h++){const d=this.getGreedyBestMove(a,e,c);if(d===null)break;const p=a.indexOf(e*e-1);if(a[p]=a[d],a[d]=e*e-1,l.push(d),c.add(a.join(",")),this.isBoardSolved(a))break}l.length>0?await this.animatePath(l):await this.animatePath([n])}else{const a=(s=this.shadowRoot)==null?void 0:s.querySelector(`[data-index="${n}"]`);a&&(a.classList.add("hint-highlight"),setTimeout(()=>{a.classList.remove("hint-highlight")},1500))}this.isSolving=!1;return}const i=this.solveAStar(t);if(i&&i.length>0)if(r)await this.animatePath(i);else{const n=i[0],a=(o=this.shadowRoot)==null?void 0:o.querySelector(`[data-index="${n}"]`);a&&(a.classList.add("hint-highlight"),setTimeout(()=>{a.classList.remove("hint-highlight")},1500))}this.isSolving=!1}getBoardArray(){const r=new Array(this.gridSize*this.gridSize).fill(-1);return this.tiles.forEach(e=>{r[e.currentIndex]=e.id}),r}isBoardSolved(r){return r.every((e,t)=>e===t)}getManhattanDistance(r,e){let t=0;for(let i=0;i<r.length;i++){const s=r[i];if(s===e*e-1)continue;const o=Math.floor(s/e),n=s%e,a=Math.floor(i/e),l=i%e;t+=Math.abs(o-a)+Math.abs(n-l)}return t}getGreedyBestMove(r,e,t){const i=r.indexOf(e*e-1),s=this.getNeighbors(i,e);let o=null,n=1/0;for(const a of s){const l=[...r];if(l[i]=r[a],l[a]=e*e-1,t&&t.has(l.join(",")))continue;const c=this.getManhattanDistance(l,e);c<n&&(n=c,o=a)}return o}solveAStar(r){const t=[],i=new Set,s=this.getManhattanDistance(r,3);t.push({board:r,path:[],g:0,f:s}),i.add(r.join(","));let o=0;for(;t.length>0&&o<5e3;){o++,t.sort((c,h)=>c.f-h.f);const n=t.shift();if(this.isBoardSolved(n.board))return n.path;const a=n.board.indexOf(8),l=this.getNeighbors(a,3);for(const c of l){const h=[...n.board];h[a]=n.board[c],h[c]=8;const d=h.join(",");if(i.has(d))continue;i.add(d);const p=[...n.path,c],g=n.g+1,v=g+this.getManhattanDistance(h,3);t.push({board:h,path:p,g,f:v})}}return null}async animatePath(r){var e;for(const t of r){if(!this.isSolving)break;const i=this.tiles.find(o=>o.currentIndex===t),s=(e=this.shadowRoot)==null?void 0:e.querySelector(`[data-index="${t}"]`);if(s){const o=this.gridSize,n=s.getBoundingClientRect(),a=parseFloat(getComputedStyle(this.gridElement).gap||"0"),l=n.width+a,c=n.height+a,h=Math.floor(t/o),d=Math.floor(this.blankIndex/o);let p=0,g=0;h===d?p=this.blankIndex>t?l:-l:g=this.blankIndex>t?c:-c,s.style.transition="transform 0.15s ease-out",s.style.transform=`translate3d(${p}px, ${g}px, 0)`,this.triggerHaptic(),await new Promise(P=>setTimeout(P,150));const v=this.blankIndex,Z=i.currentIndex,fe=this.tiles.find(P=>P.id===o*o-1);i.currentIndex=v,fe.currentIndex=Z,this.blankIndex=Z,this.moves++,this.tiles=[...this.tiles],s.style.transition="none",s.style.transform="",await new Promise(P=>setTimeout(P,80))}}this.checkWinState()}handleImageChange(r){const e=r.target,t=V.find(i=>i.id===e.value);t&&(this.activeImage=t)}handleGridSizeChange(r){const e=r.target;this.gridSize=parseInt(e.value)}render(){const r=this.gridSize,e=[...this.tiles].sort((t,i)=>t.currentIndex-i.currentIndex);return U`
       <div class="header-panel">
         <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-          <div class="active-synth-name">${this.activeImage.name}</div>
+          <div class="active-synth-name ${this.activeImage.id}">${this.activeImage.name}</div>
           <div class="order-btn-wrapper" title="Posters coming soon!">
             <span class="btn-order-poster" style="cursor: default;">
               Posters Coming Soon
@@ -204,6 +204,98 @@
       letter-spacing: 0.05em;
       color: var(--accent-cyan);
       text-shadow: var(--shadow-glow-cyan);
+      text-transform: uppercase;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .active-synth-name.minimoog {
+      font-family: 'BioRhyme', serif;
+      font-weight: 800;
+      color: #f5a623;
+      text-shadow: 0 0 12px rgba(245, 166, 35, 0.4);
+      text-transform: capitalize;
+    }
+
+    .active-synth-name.arpodysseymkiii {
+      font-family: 'Syncopate', sans-serif;
+      font-weight: 700;
+      color: #ff5200;
+      text-shadow: 0 0 12px rgba(255, 82, 0, 0.5);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .active-synth-name.dx7 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      color: #00f5d4;
+      text-shadow: 0 0 12px rgba(0, 245, 212, 0.5);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .active-synth-name.juno60 {
+      font-family: 'Syncopate', sans-serif;
+      font-weight: 700;
+      font-style: italic;
+      color: #ff2a4b;
+      text-shadow: 0 0 12px rgba(255, 42, 75, 0.5);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .active-synth-name.tb303 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-style: italic;
+      color: #39ff14;
+      text-shadow: 0 0 12px rgba(57, 255, 20, 0.5);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .active-synth-name.tr808 {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 900;
+      color: #ff6b00;
+      text-shadow: 0 0 12px rgba(255, 107, 0, 0.5);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .active-synth-name.tr909 {
+      font-family: 'Syncopate', sans-serif;
+      font-weight: 700;
+      color: #e2e2e8;
+      text-shadow: 0 0 12px rgba(226, 226, 232, 0.3);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .active-synth-name.cz1 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-style: italic;
+      color: #00bcff;
+      text-shadow: 0 0 12px rgba(0, 188, 255, 0.5);
+      text-transform: uppercase;
+    }
+
+    .active-synth-name.mpc60 {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 800;
+      color: #ded6c5;
+      text-shadow: 0 0 12px rgba(222, 214, 197, 0.3);
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+    }
+
+    .active-synth-name.sp1200 {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 900;
+      font-style: italic;
+      color: #4b7bec;
+      text-shadow: 0 0 12px rgba(75, 123, 236, 0.5);
       text-transform: uppercase;
     }
 
@@ -828,4 +920,4 @@
       text-shadow: var(--shadow-glow-orange);
     }
   `;b([m()],f.prototype,"gridSize",2);b([m()],f.prototype,"activeImage",2);b([m()],f.prototype,"tiles",2);b([m()],f.prototype,"blankIndex",2);b([m()],f.prototype,"moves",2);b([m()],f.prototype,"secondsElapsed",2);b([m()],f.prototype,"isPlaying",2);b([m()],f.prototype,"hasWon",2);b([m()],f.prototype,"showPreview",2);b([m()],f.prototype,"isSolving",2);b([m()],f.prototype,"gameMode",2);b([Be(".puzzle-grid")],f.prototype,"gridElement",2);f=b([Re("sliding-puzzle")],f);
-//# sourceMappingURL=index-UpQU2BWp.js.map
+//# sourceMappingURL=index-BgwU3ZNf.js.map
