@@ -4,6 +4,9 @@ import { customElement, state, query } from 'lit/decorators.js';
 interface PuzzleTile {
   id: number;       // The original/correct position index (0 to size*size - 1)
   currentIndex: number; // Current grid index (0 to size*size - 1)
+  peelProgress?: number; // 0 to 1
+  isPeeledOff?: boolean;
+  peelCorner?: 'tr' | 'tl' | 'br' | 'bl';
 }
 
 const SYNTH_IMAGES = [
@@ -45,6 +48,13 @@ export class SlidingPuzzle extends LitElement {
   private startY = 0;
   private allowedDragDirection: 'up' | 'down' | 'left' | 'right' | null = null;
   private maxDragDistance = 0;
+
+  // Peel Drag Physics state
+  private peelTile: PuzzleTile | null = null;
+  private peelStartX = 0;
+  private peelStartY = 0;
+  private peelStartProgress = 0;
+  private peelMaxDistance = 100;
 
   static styles = css`
     *, *::before, *::after {
@@ -387,8 +397,10 @@ export class SlidingPuzzle extends LitElement {
       position: relative;
       width: 100%;
       height: 100%;
-      background-size: var(--bg-size);
-      background-repeat: no-repeat;
+      background-color: #1a1a1a;
+      background-image: 
+        radial-gradient(circle at 30% 70%, rgba(255,255,255,0.05) 0%, transparent 20%),
+        radial-gradient(circle at 70% 30%, rgba(255,255,255,0.08) 0%, transparent 30%);
       cursor: grab;
       user-select: none;
       touch-action: none;
@@ -401,62 +413,97 @@ export class SlidingPuzzle extends LitElement {
       overflow: visible;
     }
 
+    .sticker-layer {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-size: var(--bg-size);
+      background-repeat: no-repeat;
+      pointer-events: none;
+      border-radius: 4px;
+    }
+
     /* Subtle sticker peel effects */
-    .tile.peel-tr::after {
+    .sticker-layer.peel-tr {
+      clip-path: polygon(0 0, calc(100% - var(--peel-size, 12px)) 0, 100% var(--peel-size, 12px), 100% 100%, 0 100%);
+    }
+    .sticker-layer.peel-tr::after {
       content: '';
       position: absolute;
       top: -0.5px;
       right: -0.5px;
       width: var(--peel-size, 12px);
       height: var(--peel-size, 12px);
-      background: linear-gradient(225deg, #08080b 38%, rgba(0,0,0,0.6) 41%, rgba(0,0,0,0.15) 45%, #d8d3c9 47%, #faf8f5 55%, #ffffff 80%);
+      background: linear-gradient(225deg, transparent 41%, rgba(0,0,0,0.15) 45%, #d8d3c9 47%, #faf8f5 55%, #ffffff 80%);
       box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.4);
       border-radius: 0 0 0 2px;
       pointer-events: none;
       z-index: 5;
     }
 
-    .tile.peel-tl::after {
+    .sticker-layer.peel-tl {
+      clip-path: polygon(var(--peel-size, 12px) 0, 100% 0, 100% 100%, 0 100%, 0 var(--peel-size, 12px));
+    }
+    .sticker-layer.peel-tl::after {
       content: '';
       position: absolute;
       top: -0.5px;
       left: -0.5px;
       width: var(--peel-size, 12px);
       height: var(--peel-size, 12px);
-      background: linear-gradient(135deg, #08080b 38%, rgba(0,0,0,0.6) 41%, rgba(0,0,0,0.15) 45%, #d8d3c9 47%, #faf8f5 55%, #ffffff 80%);
+      background: linear-gradient(135deg, transparent 41%, rgba(0,0,0,0.15) 45%, #d8d3c9 47%, #faf8f5 55%, #ffffff 80%);
       box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
       border-radius: 0 0 2px 0;
       pointer-events: none;
       z-index: 5;
     }
 
-    .tile.peel-br::after {
+    .sticker-layer.peel-br {
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--peel-size, 12px)), calc(100% - var(--peel-size, 12px)) 100%, 0 100%);
+    }
+    .sticker-layer.peel-br::after {
       content: '';
       position: absolute;
       bottom: -0.5px;
       right: -0.5px;
       width: var(--peel-size, 12px);
       height: var(--peel-size, 12px);
-      background: linear-gradient(315deg, #08080b 38%, rgba(0,0,0,0.6) 41%, rgba(0,0,0,0.15) 45%, #d8d3c9 47%, #faf8f5 55%, #ffffff 80%);
+      background: linear-gradient(315deg, transparent 41%, rgba(0,0,0,0.15) 45%, #d8d3c9 47%, #faf8f5 55%, #ffffff 80%);
       box-shadow: -1px -1px 2px rgba(0, 0, 0, 0.4);
       border-radius: 2px 0 0 0;
       pointer-events: none;
       z-index: 5;
     }
 
-    .tile.peel-bl::after {
+    .sticker-layer.peel-bl {
+      clip-path: polygon(0 0, 100% 0, 100% 100%, var(--peel-size, 12px) 100%, 0 calc(100% - var(--peel-size, 12px)));
+    }
+    .sticker-layer.peel-bl::after {
       content: '';
       position: absolute;
       bottom: -0.5px;
       left: -0.5px;
       width: var(--peel-size, 12px);
       height: var(--peel-size, 12px);
-      background: linear-gradient(45deg, #08080b 38%, rgba(0,0,0,0.6) 41%, rgba(0,0,0,0.15) 45%, #d8d3c9 47%, #faf8f5 55%, #ffffff 80%);
+      background: linear-gradient(45deg, transparent 41%, rgba(0,0,0,0.15) 45%, #d8d3c9 47%, #faf8f5 55%, #ffffff 80%);
       box-shadow: 1px -1px 2px rgba(0, 0, 0, 0.4);
       border-radius: 0 2px 0 0;
       pointer-events: none;
       z-index: 5;
     }
+
+    .peel-hitbox {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      z-index: 10;
+      cursor: grabbing;
+      touch-action: none;
+    }
+    .peel-hitbox.peel-tr { top: 0; right: 0; }
+    .peel-hitbox.peel-tl { top: 0; left: 0; }
+    .peel-hitbox.peel-br { bottom: 0; right: 0; }
+    .peel-hitbox.peel-bl { bottom: 0; left: 0; }
 
     .tile:hover {
       border-color: var(--tile-hover-border, rgba(255, 94, 0, 0.4));
@@ -929,7 +976,20 @@ export class SlidingPuzzle extends LitElement {
     const tiles: PuzzleTile[] = [];
 
     for (let i = 0; i < totalTiles; i++) {
-      tiles.push({ id: i, currentIndex: i });
+      let peelCorner: 'tr' | 'tl' | 'br' | 'bl' | undefined;
+      let peelProgress = 0;
+      if (i === 1) { peelCorner = 'tr'; peelProgress = 0.12; }
+      else if (i === 3) { peelCorner = 'tl'; peelProgress = 0.08; }
+      else if (i === 5) { peelCorner = 'br'; peelProgress = 0.10; }
+      else if ((size === 3 && i === 6) || (size > 3 && i === 8)) { peelCorner = 'bl'; peelProgress = 0.06; }
+
+      tiles.push({ 
+        id: i, 
+        currentIndex: i, 
+        peelProgress,
+        isPeeledOff: false,
+        peelCorner 
+      });
     }
 
     this.tiles = tiles;
@@ -1002,6 +1062,10 @@ export class SlidingPuzzle extends LitElement {
   // Pointer gesture events to handle tactile drag-and-slide
   private _boundPointerMove = (e: PointerEvent) => this.handlePointerMove(e);
   private _boundPointerUp = (e: PointerEvent) => this.handlePointerUp(e);
+
+  // Peel pointer events
+  private _boundPeelPointerMove = (e: PointerEvent) => this.handlePeelPointerMove(e);
+  private _boundPeelPointerUp = (e: PointerEvent) => this.handlePeelPointerUp(e);
 
   private handlePointerDown(e: PointerEvent, tile: PuzzleTile) {
     const canMove = this.gameMode === 'freeplay' || (this.gameMode === 'play' && this.isPlaying);
@@ -1145,6 +1209,75 @@ export class SlidingPuzzle extends LitElement {
     this.dragTile = null;
     this.dragElement = null;
     this.allowedDragDirection = null;
+  }
+
+  private handlePeelPointerDown(e: PointerEvent, tile: PuzzleTile) {
+    if (tile.isPeeledOff) return;
+    
+    // Stop propagation so tile dragging isn't triggered
+    e.stopPropagation();
+    e.preventDefault();
+    
+    this.peelTile = tile;
+    this.peelStartX = e.clientX;
+    this.peelStartY = e.clientY;
+    this.peelStartProgress = tile.peelProgress || 0;
+    
+    const rect = (e.currentTarget as HTMLElement).closest('.tile')?.getBoundingClientRect();
+    this.peelMaxDistance = rect ? Math.max(rect.width, rect.height) : 100;
+    
+    window.addEventListener('pointermove', this._boundPeelPointerMove);
+    window.addEventListener('pointerup', this._boundPeelPointerUp);
+    window.addEventListener('pointercancel', this._boundPeelPointerUp);
+  }
+
+  private handlePeelPointerMove(e: PointerEvent) {
+    if (!this.peelTile) return;
+    
+    const deltaX = e.clientX - this.peelStartX;
+    const deltaY = e.clientY - this.peelStartY;
+    
+    let pullDistance = 0;
+    if (this.peelTile.peelCorner === 'tr') {
+      pullDistance = -deltaX + deltaY;
+    } else if (this.peelTile.peelCorner === 'tl') {
+      pullDistance = deltaX + deltaY;
+    } else if (this.peelTile.peelCorner === 'br') {
+      pullDistance = -deltaX - deltaY;
+    } else if (this.peelTile.peelCorner === 'bl') {
+      pullDistance = deltaX - deltaY;
+    }
+    
+    const progressDelta = pullDistance / this.peelMaxDistance;
+    let newProgress = this.peelStartProgress + progressDelta;
+    newProgress = Math.max(0, Math.min(1.2, newProgress));
+    
+    this.peelTile.peelProgress = newProgress;
+    this.tiles = [...this.tiles];
+  }
+
+  private handlePeelPointerUp(e: PointerEvent) {
+    if (!this.peelTile) return;
+    
+    window.removeEventListener('pointermove', this._boundPeelPointerMove);
+    window.removeEventListener('pointerup', this._boundPeelPointerUp);
+    window.removeEventListener('pointercancel', this._boundPeelPointerUp);
+    
+    if (this.peelTile.peelProgress && this.peelTile.peelProgress > 0.75) {
+      this.peelTile.isPeeledOff = true;
+      this.triggerHaptic();
+    } else {
+      let defaultProgress = 0;
+      if (this.peelTile.id === 1) defaultProgress = 0.12;
+      else if (this.peelTile.id === 3) defaultProgress = 0.08;
+      else if (this.peelTile.id === 5) defaultProgress = 0.10;
+      else if ((this.gridSize === 3 && this.peelTile.id === 6) || (this.gridSize > 3 && this.peelTile.id === 8)) defaultProgress = 0.06;
+      
+      this.peelTile.peelProgress = defaultProgress;
+    }
+    
+    this.peelTile = null;
+    this.tiles = [...this.tiles];
   }
 
   // A* Solver implementation for 3x3 (and single-hint for larger grids)
@@ -1468,30 +1601,25 @@ export class SlidingPuzzle extends LitElement {
 
       let peelClass = '';
       let peelSize = '';
-      if (!isBlank) {
-        if (tile.id === 1) {
-          peelClass = 'peel-tr';
-          peelSize = '12px'; // Max
-        } else if (tile.id === 3) {
-          peelClass = 'peel-tl';
-          peelSize = '8px';  // Pulled back (Medium)
-        } else if (tile.id === 5) {
-          peelClass = 'peel-br';
-          peelSize = '10px'; // Pulled back (Medium-Large)
-        } else if ((size === 3 && tile.id === 6) || (size > 3 && tile.id === 8)) {
-          peelClass = 'peel-bl';
-          peelSize = '6px';  // Pulled back (Small)
-        }
+      if (!isBlank && tile.peelCorner && !tile.isPeeledOff) {
+        peelClass = `peel-${tile.peelCorner}`;
+        peelSize = `calc(${tile.peelProgress || 0} * 100px)`;
       }
 
       return html`
               <div 
-                class="tile ${hideBlank ? 'blank' : ''} ${peelClass}" 
+                class="tile ${hideBlank ? 'blank' : ''}" 
                 data-index=${tile.currentIndex}
-                style="background-image: url('${this.activeImage.url}'); background-position: ${bgPosition};${peelSize ? ` --peel-size: ${peelSize};` : ''}"
                 @pointerdown=${(e: PointerEvent) => this.handlePointerDown(e, tile)}
                 @dragstart=${(e: Event) => e.preventDefault()}
-              ></div>
+              >
+                ${!tile.isPeeledOff ? html`
+                  <div class="sticker-layer ${peelClass}" style="background-image: url('${this.activeImage.url}'); background-position: ${bgPosition}; ${peelSize ? `--peel-size: ${peelSize};` : ''}"></div>
+                  ${tile.peelCorner ? html`
+                    <div class="peel-hitbox peel-${tile.peelCorner}" @pointerdown=${(e: PointerEvent) => this.handlePeelPointerDown(e, tile)}></div>
+                  ` : ''}
+                ` : ''}
+              </div>
             `;
     })}
         </div>
