@@ -37,7 +37,7 @@ export class SlidingPuzzle extends LitElement {
 
   private timerInterval?: number;
   private hasMoved = false;
-  
+
   // Drag/Touch Physics state
   private dragTile: PuzzleTile | null = null;
   private dragElement: HTMLElement | null = null;
@@ -542,6 +542,161 @@ export class SlidingPuzzle extends LitElement {
       0% { outline-color: rgba(0, 229, 255, 0.4); }
       100% { outline-color: rgba(0, 229, 255, 1); }
     }
+
+    /* Synth Print Shop Footer & Patch Jack */
+    .synth-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border-color);
+    }
+
+    .footer-serial {
+      font-family: var(--font-digital);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .footer-jack-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .jack-label {
+      font-family: var(--font-digital);
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .jack-port {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #3a3d46 0%, #1c1d22 70%, #0c0d10 100%);
+      border: 2px solid #111;
+      box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.8),
+        0 1px 1px rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      position: relative;
+      transition: all var(--transition-speed) ease;
+      text-decoration: none;
+    }
+
+    .jack-port::after {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #000;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.9);
+      transition: background-color var(--transition-speed) ease;
+    }
+
+    .jack-port:hover {
+      border-color: var(--accent-orange);
+      box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.8),
+        0 0 8px rgba(255, 94, 0, 0.4);
+    }
+
+    .jack-port:hover::after {
+      background-color: #ff5e00;
+      box-shadow: 0 0 6px var(--accent-orange);
+    }
+
+    /* Backlit LED Buy Button */
+    .order-btn-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .led-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #2c0b00;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    .btn-order-poster:hover + .led-indicator,
+    .order-btn-wrapper:hover .led-indicator {
+      background-color: #ff3c00;
+      box-shadow: 
+        0 0 8px #ff3c00,
+        inset 0 1px 1px rgba(255,255,255,0.5);
+    }
+
+    .btn-order-poster {
+      font-family: var(--font-family);
+      font-size: 0.7rem;
+      padding: 0.35rem 0.7rem;
+      border-radius: 4px;
+      border: 1px solid #111;
+      background: linear-gradient(180deg, #2a2d36 0%, #1e2026 100%);
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      transition: all var(--transition-speed) cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .btn-order-poster:hover {
+      color: var(--text-primary);
+      background: linear-gradient(180deg, #323642 0%, #22252c 100%);
+      border-color: var(--accent-orange);
+      box-shadow: 0 0 6px rgba(255, 94, 0, 0.2);
+    }
+
+    /* Solved Promo CSS */
+    .win-promo {
+      margin-top: 0.5rem;
+      padding: 0.6rem 1rem;
+      background-color: rgba(255, 94, 0, 0.03);
+      border: 1px dashed rgba(255, 94, 0, 0.2);
+      border-radius: 6px;
+      max-width: 320px;
+      text-align: center;
+    }
+
+    .win-promo-text {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+      margin-bottom: 0.4rem;
+    }
+
+    .win-promo-link {
+      display: inline-block;
+      font-family: var(--font-digital);
+      font-size: 0.8rem;
+      color: var(--accent-orange);
+      text-decoration: none;
+      text-transform: uppercase;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+
+    .win-promo-link:hover {
+      color: #ff9e66;
+      text-shadow: var(--shadow-glow-orange);
+    }
   `;
 
   connectedCallback() {
@@ -605,15 +760,15 @@ export class SlidingPuzzle extends LitElement {
     this.isPlaying = false;
     this.hasWon = false;
     this.showPreview = false;
-    
+
     const size = this.gridSize;
     const totalTiles = size * size;
     const tiles: PuzzleTile[] = [];
-    
+
     for (let i = 0; i < totalTiles; i++) {
       tiles.push({ id: i, currentIndex: i });
     }
-    
+
     this.tiles = tiles;
     this.blankIndex = totalTiles - 1;
   }
@@ -621,33 +776,33 @@ export class SlidingPuzzle extends LitElement {
   // Shuffle the board by executing a sequence of random valid sliding moves
   private shufflePuzzle() {
     this.resetPuzzle();
-    
+
     const size = this.gridSize;
     let blankIdx = size * size - 1;
     const tempTiles = [...this.tiles];
-    
+
     // Perform random moves to shuffle the puzzle (guarantees mathematical solvability)
     let lastMovedId = -1;
     const shuffleSteps = size * size * 25; // Scale shuffle complexity with grid size
-    
+
     for (let step = 0; step < shuffleSteps; step++) {
       const neighbors = this.getNeighbors(blankIdx, size);
       // Avoid immediately moving the same tile back
       const validNeighbors = neighbors.filter(nIdx => tempTiles.find(t => t.currentIndex === nIdx)?.id !== lastMovedId);
-      const chosenNeighborIdx = validNeighbors.length > 0 
-        ? validNeighbors[Math.floor(Math.random() * validNeighbors.length)] 
+      const chosenNeighborIdx = validNeighbors.length > 0
+        ? validNeighbors[Math.floor(Math.random() * validNeighbors.length)]
         : neighbors[Math.floor(Math.random() * neighbors.length)];
-      
+
       const neighborTile = tempTiles.find(t => t.currentIndex === chosenNeighborIdx)!;
       const blankTile = tempTiles.find(t => t.id === size * size - 1)!;
       lastMovedId = neighborTile.id;
-      
+
       // Swap coordinates of both tiles
       neighborTile.currentIndex = blankIdx;
       blankTile.currentIndex = chosenNeighborIdx;
       blankIdx = chosenNeighborIdx;
     }
-    
+
     // Sort tiles by current index for rendering order helper if needed, 
     // but we can just update the reactive property
     this.tiles = tempTiles;
@@ -660,12 +815,12 @@ export class SlidingPuzzle extends LitElement {
     const row = Math.floor(index / size);
     const col = index % size;
     const neighbors: number[] = [];
-    
+
     if (row > 0) neighbors.push(index - size); // Up
     if (row < size - 1) neighbors.push(index + size); // Down
     if (col > 0) neighbors.push(index - 1); // Left
     if (col < size - 1) neighbors.push(index + 1); // Right
-    
+
     return neighbors;
   }
 
@@ -688,38 +843,38 @@ export class SlidingPuzzle extends LitElement {
   private handlePointerDown(e: PointerEvent, tile: PuzzleTile) {
     const canMove = this.gameMode === 'freeplay' || (this.gameMode === 'play' && this.isPlaying);
     if (!canMove || this.isSolving || this.hasWon) return;
-    
+
     // Prevent default browser behaviors like text selection or image dragging
     e.preventDefault();
-    
+
     const size = this.gridSize;
     const tileIdx = tile.currentIndex;
     const blankIdx = this.blankIndex;
-    
+
     // Is the clicked tile adjacent to the blank spot?
     const rowTile = Math.floor(tileIdx / size);
     const colTile = tileIdx % size;
     const rowBlank = Math.floor(blankIdx / size);
     const colBlank = blankIdx % size;
-    
+
     const isAdjacent = (Math.abs(rowTile - rowBlank) === 1 && colTile === colBlank) ||
-                        (Math.abs(colTile - colBlank) === 1 && rowTile === rowBlank);
-    
+      (Math.abs(colTile - colBlank) === 1 && rowTile === rowBlank);
+
     if (!isAdjacent) return;
-    
+
     const el = e.currentTarget as HTMLElement;
     this.dragTile = tile;
     this.dragElement = el;
     this.startX = e.clientX;
     this.startY = e.clientY;
     this.hasMoved = false;
-    
+
     if (rowTile === rowBlank) {
       this.allowedDragDirection = colBlank > colTile ? 'right' : 'left';
     } else {
       this.allowedDragDirection = rowBlank > rowTile ? 'down' : 'up';
     }
-    
+
     // Determine allowed direction and max travel distance
     const rect = el.getBoundingClientRect();
     const gap = parseFloat(getComputedStyle(this.gridElement).gap || '0');
@@ -728,31 +883,31 @@ export class SlidingPuzzle extends LitElement {
     } else {
       this.maxDragDistance = rect.height + gap;
     }
-    
+
     // Bind to window for global movement tracking, ensuring smooth tracking even if pointer leaves the element
     window.addEventListener('pointermove', this._boundPointerMove);
     window.addEventListener('pointerup', this._boundPointerUp);
     window.addEventListener('pointercancel', this._boundPointerUp);
-    
+
     el.style.transition = 'none';
     el.style.zIndex = '10';
   }
 
   private handlePointerMove(e: PointerEvent) {
     if (!this.dragTile || !this.dragElement) return;
-    
+
     const deltaX = e.clientX - this.startX;
     const deltaY = e.clientY - this.startY;
-    
+
     // Set hasMoved if pointer moves beyond a small threshold
     if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
       this.hasMoved = true;
     }
-    
+
     let translateX = 0;
     let translateY = 0;
     const max = this.maxDragDistance;
-    
+
     if (this.allowedDragDirection === 'right') {
       translateX = Math.max(0, Math.min(max, deltaX));
     } else if (this.allowedDragDirection === 'left') {
@@ -762,58 +917,58 @@ export class SlidingPuzzle extends LitElement {
     } else if (this.allowedDragDirection === 'up') {
       translateY = Math.min(0, Math.max(-max, deltaY));
     }
-    
+
     this.dragElement.style.transform = `translate3d(${translateX}px, ${translateY}px, 0)`;
   }
 
   private handlePointerUp(e: PointerEvent) {
     if (!this.dragTile || !this.dragElement) return;
-    
+
     const el = this.dragElement;
     const tile = this.dragTile;
     const size = this.gridSize;
-    
+
     // Clean up window listeners
     window.removeEventListener('pointermove', this._boundPointerMove);
     window.removeEventListener('pointerup', this._boundPointerUp);
     window.removeEventListener('pointercancel', this._boundPointerUp);
-    
+
     const transform = el.style.transform;
     const match = transform.match(/translate3d\(([^px]+)px,\s*([^px]+)px/);
     let draggedDistance = 0;
-    
+
     if (match) {
       const tx = parseFloat(match[1]);
       const ty = parseFloat(match[2]);
       draggedDistance = Math.max(Math.abs(tx), Math.abs(ty));
     }
-    
+
     // If dragged more than 35% of the distance OR it was a simple tap/click (hasMoved === false)
     const threshold = this.maxDragDistance * 0.35;
     const shouldMove = (draggedDistance >= threshold || !this.hasMoved) && e.type !== 'pointercancel';
-    
+
     el.style.transition = 'transform 0.15s ease-out';
-    
+
     if (shouldMove) {
       // Execute Move: Swap current indices of both the clicked tile and the blank tile
       const prevBlank = this.blankIndex;
       const newBlank = tile.currentIndex;
       const blankTile = this.tiles.find(t => t.id === size * size - 1)!;
-      
+
       tile.currentIndex = prevBlank;
       blankTile.currentIndex = newBlank;
       this.blankIndex = newBlank;
-      
+
       this.moves++;
       this.triggerHaptic();
-      
+
       // Update tiles reference to trigger lit render
       this.tiles = [...this.tiles];
-      
+
       // Clean up transform instantly as its new grid slot will position it
       el.style.transform = '';
       el.style.zIndex = '';
-      
+
       // Check win
       this.checkWinState();
     } else {
@@ -823,7 +978,7 @@ export class SlidingPuzzle extends LitElement {
         el.style.zIndex = '';
       }, 150);
     }
-    
+
     this.dragTile = null;
     this.dragElement = null;
     this.allowedDragDirection = null;
@@ -833,10 +988,10 @@ export class SlidingPuzzle extends LitElement {
   private async runSolver(isFullSolve: boolean) {
     if (!this.isPlaying || this.hasWon || this.isSolving) return;
     this.isSolving = true;
-    
+
     const size = this.gridSize;
     const startBoard = this.getBoardArray();
-    
+
     if (size > 3) {
       // 4x4 or 5x5: run one step of greedy best move
       const nextIdx = this.getGreedyBestMove(startBoard, size);
@@ -847,20 +1002,20 @@ export class SlidingPuzzle extends LitElement {
           const path: number[] = [];
           let visited = new Set<string>();
           visited.add(currentBoard.join(','));
-          
+
           for (let i = 0; i < 40; i++) {
             const bestMove = this.getGreedyBestMove(currentBoard, size, visited);
             if (bestMove === null) break;
-            
+
             const bIdx = currentBoard.indexOf(size * size - 1);
             currentBoard[bIdx] = currentBoard[bestMove];
             currentBoard[bestMove] = size * size - 1;
             path.push(bestMove);
             visited.add(currentBoard.join(','));
-            
+
             if (this.isBoardSolved(currentBoard)) break;
           }
-          
+
           if (path.length > 0) {
             await this.animatePath(path);
           } else {
@@ -881,10 +1036,10 @@ export class SlidingPuzzle extends LitElement {
       this.isSolving = false;
       return;
     }
-    
+
     // 3x3: optimal A* solver
     const path = this.solveAStar(startBoard);
-    
+
     if (path && path.length > 0) {
       if (isFullSolve) {
         await this.animatePath(path);
@@ -921,12 +1076,12 @@ export class SlidingPuzzle extends LitElement {
     for (let i = 0; i < board.length; i++) {
       const val = board[i];
       if (val === size * size - 1) continue; // Skip blank tile
-      
+
       const targetRow = Math.floor(val / size);
       const targetCol = val % size;
       const currentRow = Math.floor(i / size);
       const currentCol = i % size;
-      
+
       dist += Math.abs(targetRow - currentRow) + Math.abs(targetCol - currentCol);
     }
     return dist;
@@ -935,25 +1090,25 @@ export class SlidingPuzzle extends LitElement {
   private getGreedyBestMove(board: number[], size: number, visited?: Set<string>): number | null {
     const blankIdx = board.indexOf(size * size - 1);
     const neighbors = this.getNeighbors(blankIdx, size);
-    
+
     let bestMove: number | null = null;
     let minDistance = Infinity;
-    
+
     for (const nIdx of neighbors) {
       // Simulate move
       const nextBoard = [...board];
       nextBoard[blankIdx] = board[nIdx];
       nextBoard[nIdx] = size * size - 1;
-      
+
       if (visited && visited.has(nextBoard.join(','))) continue;
-      
+
       const dist = this.getManhattanDistance(nextBoard, size);
       if (dist < minDistance) {
         minDistance = dist;
         bestMove = nIdx;
       }
     }
-    
+
     return bestMove;
   }
 
@@ -961,52 +1116,52 @@ export class SlidingPuzzle extends LitElement {
     const size = 3;
     const queue: Array<{ board: number[]; path: number[]; g: number; f: number }> = [];
     const visited = new Set<string>();
-    
+
     const h = this.getManhattanDistance(startBoard, size);
     queue.push({ board: startBoard, path: [], g: 0, f: h });
     visited.add(startBoard.join(','));
-    
+
     let iterations = 0;
     while (queue.length > 0 && iterations < 5000) {
       iterations++;
       // Sort to get node with lowest f score
       queue.sort((a, b) => a.f - b.f);
       const current = queue.shift()!;
-      
+
       if (this.isBoardSolved(current.board)) {
         return current.path;
       }
-      
+
       const blankIdx = current.board.indexOf(8);
       const neighbors = this.getNeighbors(blankIdx, size);
-      
+
       for (const nIdx of neighbors) {
         const nextBoard = [...current.board];
         nextBoard[blankIdx] = current.board[nIdx];
         nextBoard[nIdx] = 8;
-        
+
         const key = nextBoard.join(',');
         if (visited.has(key)) continue;
-        
+
         visited.add(key);
         const nextPath = [...current.path, nIdx];
         const g = current.g + 1;
         const f = g + this.getManhattanDistance(nextBoard, size);
-        
+
         queue.push({ board: nextBoard, path: nextPath, g, f });
       }
     }
-    
+
     return null; // Not found within limits
   }
 
   private async animatePath(path: number[]) {
     for (const moveIdx of path) {
       if (!this.isSolving) break;
-      
+
       const tile = this.tiles.find(t => t.currentIndex === moveIdx)!;
       const tileEl = this.shadowRoot?.querySelector(`[data-index="${moveIdx}"]`) as HTMLElement;
-      
+
       if (tileEl) {
         // Determine travel direction
         const size = this.gridSize;
@@ -1014,41 +1169,41 @@ export class SlidingPuzzle extends LitElement {
         const gap = parseFloat(getComputedStyle(this.gridElement).gap || '0');
         const distWidth = rect.width + gap;
         const distHeight = rect.height + gap;
-        
+
         const rowTile = Math.floor(moveIdx / size);
         const rowBlank = Math.floor(this.blankIndex / size);
-        
+
         let tx = 0, ty = 0;
         if (rowTile === rowBlank) {
           tx = this.blankIndex > moveIdx ? distWidth : -distWidth;
         } else {
           ty = this.blankIndex > moveIdx ? distHeight : -distHeight;
         }
-        
+
         tileEl.style.transition = 'transform 0.15s ease-out';
         tileEl.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
         this.triggerHaptic();
-        
+
         await new Promise(resolve => setTimeout(resolve, 150));
-        
+
         // Swap model state
         const prevBlank = this.blankIndex;
         const newBlank = tile.currentIndex;
         const blankTile = this.tiles.find(t => t.id === size * size - 1)!;
-        
+
         tile.currentIndex = prevBlank;
         blankTile.currentIndex = newBlank;
         this.blankIndex = newBlank;
         this.moves++;
         this.tiles = [...this.tiles];
-        
+
         tileEl.style.transition = 'none';
         tileEl.style.transform = '';
-        
+
         await new Promise(resolve => setTimeout(resolve, 80));
       }
     }
-    
+
     this.checkWinState();
   }
 
@@ -1067,13 +1222,21 @@ export class SlidingPuzzle extends LitElement {
 
   render() {
     const size = this.gridSize;
-    
+
     // Sort tiles by current index so they render in correct grid placement order
     const sortedTiles = [...this.tiles].sort((a, b) => a.currentIndex - b.currentIndex);
 
     return html`
       <div class="header-panel">
-        <div class="active-synth-name">${this.activeImage.name}</div>
+        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+          <div class="active-synth-name">${this.activeImage.name}</div>
+          <div class="order-btn-wrapper" title="Posters coming soon!">
+            <span class="btn-order-poster" style="cursor: default;">
+              Posters Coming Soon
+            </span>
+            <span class="led-indicator"></span>
+          </div>
+        </div>
         <div class="stats">
           <div class="stat-display">
             <span class="stat-label">Moves</span>
@@ -1130,35 +1293,35 @@ export class SlidingPuzzle extends LitElement {
           "
         >
           ${sortedTiles.map(tile => {
-            const isBlank = tile.id === size * size - 1;
-            const hideBlank = isBlank && (this.gameMode === 'freeplay' || this.isPlaying);
-            
-            // Calculate slice position coordinates
-            const correctRow = Math.floor(tile.id / size);
-            const correctCol = tile.id % size;
-            const xPercent = (correctCol / (size - 1)) * 100;
-            const yPercent = (correctRow / (size - 1)) * 100;
-            const bgPosition = `${xPercent}% ${yPercent}%`;
+      const isBlank = tile.id === size * size - 1;
+      const hideBlank = isBlank && (this.gameMode === 'freeplay' || this.isPlaying);
 
-            let peelClass = '';
-            let peelSize = '';
-            if (!isBlank) {
-              if (tile.id === 1) {
-                peelClass = 'peel-tr';
-                peelSize = '12px'; // Max
-              } else if (tile.id === 3) {
-                peelClass = 'peel-tl';
-                peelSize = '8px';  // Pulled back (Medium)
-              } else if (tile.id === 5) {
-                peelClass = 'peel-br';
-                peelSize = '10px'; // Pulled back (Medium-Large)
-              } else if ((size === 3 && tile.id === 6) || (size > 3 && tile.id === 8)) {
-                peelClass = 'peel-bl';
-                peelSize = '6px';  // Pulled back (Small)
-              }
-            }
+      // Calculate slice position coordinates
+      const correctRow = Math.floor(tile.id / size);
+      const correctCol = tile.id % size;
+      const xPercent = (correctCol / (size - 1)) * 100;
+      const yPercent = (correctRow / (size - 1)) * 100;
+      const bgPosition = `${xPercent}% ${yPercent}%`;
 
-            return html`
+      let peelClass = '';
+      let peelSize = '';
+      if (!isBlank) {
+        if (tile.id === 1) {
+          peelClass = 'peel-tr';
+          peelSize = '12px'; // Max
+        } else if (tile.id === 3) {
+          peelClass = 'peel-tl';
+          peelSize = '8px';  // Pulled back (Medium)
+        } else if (tile.id === 5) {
+          peelClass = 'peel-br';
+          peelSize = '10px'; // Pulled back (Medium-Large)
+        } else if ((size === 3 && tile.id === 6) || (size > 3 && tile.id === 8)) {
+          peelClass = 'peel-bl';
+          peelSize = '6px';  // Pulled back (Small)
+        }
+      }
+
+      return html`
               <div 
                 class="tile ${hideBlank ? 'blank' : ''} ${peelClass}" 
                 data-index=${tile.currentIndex}
@@ -1167,7 +1330,7 @@ export class SlidingPuzzle extends LitElement {
                 @dragstart=${(e: Event) => e.preventDefault()}
               ></div>
             `;
-          })}
+    })}
         </div>
 
         <div 
@@ -1181,6 +1344,11 @@ export class SlidingPuzzle extends LitElement {
             <div>COMPLETED IN ${this.moves} MOVES</div>
             <div>TIME ELAPSED: ${this.formatTime(this.secondsElapsed)}</div>
           </div>
+          
+          <div class="win-promo">
+            <div class="win-promo-text" style="margin-bottom: 0;">Like these prints? Posters coming soon!</div>
+          </div>
+
           <button class="primary" style="margin-top: 0.5rem;" @click=${this.shufflePuzzle}>Play Again</button>
         </div>
 
@@ -1218,6 +1386,16 @@ export class SlidingPuzzle extends LitElement {
           Auto-Solve
         </button>
       </div>
+
+      <!-- Synth Console Footer -->
+      <footer class="synth-footer">
+        <div class="footer-jack-group">
+          <span class="jack-label">POSTER OUT</span>
+          <span class="jack-port" title="Like these prints? Posters coming soon!" style="cursor: default;"></span>
+          <span class="jack-label" style="color: var(--accent-orange)">POSTERS COMING SOON</span>
+        </div>
+        <div class="footer-serial">MOD-808 // SERIAL: WS-2026</div>
+      </footer>
     `;
   }
 }
