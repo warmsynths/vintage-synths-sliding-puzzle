@@ -308,6 +308,38 @@ select:focus {
 }
 
 @media (max-width: 480px) {
+  .synth-console-outer {
+    border-radius: 8px;
+  }
+  .synth-wood-cheek {
+    width: 12px;
+  }
+  .synth-wood-cheek.left {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+  }
+  .synth-wood-cheek.right {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+  }
+  .synth-console-inner {
+    padding: 1.25rem 0.75rem;
+    gap: 1rem;
+  }
+  .synth-brand {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.4rem;
+    margin-bottom: 0.25rem;
+  }
+  .brand-logo {
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+  }
+  .model-badge {
+    font-size: 0.75rem;
+  }
   .synth-footer {
     flex-direction: column;
     gap: 0.5rem;

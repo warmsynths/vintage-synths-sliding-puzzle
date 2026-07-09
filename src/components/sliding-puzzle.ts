@@ -789,6 +789,77 @@ export class SlidingPuzzle extends LitElement {
       color: #ff9e66;
       text-shadow: var(--shadow-glow-orange);
     }
+
+    @media (max-width: 480px) {
+      :host {
+        gap: 1rem;
+      }
+      .header-panel {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        padding-bottom: 0.75rem;
+      }
+      .active-synth-name {
+        text-align: center;
+        font-size: 1rem;
+      }
+      .order-btn-wrapper {
+        justify-content: center;
+      }
+      .stats {
+        justify-content: center;
+        width: 100%;
+        gap: 0.5rem;
+      }
+      .stat-display {
+        flex: 1;
+        min-width: 0;
+        padding: 0.25rem 0.5rem;
+      }
+      .stat-value {
+        font-size: 1.15rem;
+      }
+      .mode-selector {
+        padding: 1px;
+      }
+      .mode-btn {
+        padding: 0.4rem 0;
+        font-size: 0.75rem;
+      }
+      .controls {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .controls select,
+      .controls button {
+        width: 100%;
+        min-width: 0;
+      }
+      .game-actions {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+      }
+      .game-actions button {
+        padding-top: 1rem;
+        padding-bottom: 0.45rem;
+        font-size: 0.75rem;
+      }
+      .board-wrapper {
+        border-width: 4px;
+      }
+      .synth-footer {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: center;
+        text-align: center;
+      }
+      .footer-jack-group {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+    }
   `;
 
   connectedCallback() {
