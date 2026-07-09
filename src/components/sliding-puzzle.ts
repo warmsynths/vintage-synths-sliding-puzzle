@@ -306,6 +306,64 @@ export class SlidingPuzzle extends LitElement {
         inset 0 1px 0 rgba(255, 255, 255, 0.12),
         0 4px 8px rgba(0, 0, 0, 0.4);
       transition: border-color 0.2s, box-shadow 0.2s;
+      overflow: visible;
+    }
+
+    /* Subtle sticker peel effects */
+    .tile.peel-tr::after {
+      content: '';
+      position: absolute;
+      top: -0.5px;
+      right: -0.5px;
+      width: var(--peel-size, 12px);
+      height: var(--peel-size, 12px);
+      background: linear-gradient(225deg, #08080b 38%, rgba(0,0,0,0.6) 41%, rgba(0,0,0,0.15) 45%, #d8d3c9 47%, #faf8f5 55%, #ffffff 80%);
+      box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.4);
+      border-radius: 0 0 0 2px;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .tile.peel-tl::after {
+      content: '';
+      position: absolute;
+      top: -0.5px;
+      left: -0.5px;
+      width: var(--peel-size, 12px);
+      height: var(--peel-size, 12px);
+      background: linear-gradient(135deg, #08080b 38%, rgba(0,0,0,0.6) 41%, rgba(0,0,0,0.15) 45%, #d8d3c9 47%, #faf8f5 55%, #ffffff 80%);
+      box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+      border-radius: 0 0 2px 0;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .tile.peel-br::after {
+      content: '';
+      position: absolute;
+      bottom: -0.5px;
+      right: -0.5px;
+      width: var(--peel-size, 12px);
+      height: var(--peel-size, 12px);
+      background: linear-gradient(315deg, #08080b 38%, rgba(0,0,0,0.6) 41%, rgba(0,0,0,0.15) 45%, #d8d3c9 47%, #faf8f5 55%, #ffffff 80%);
+      box-shadow: -1px -1px 2px rgba(0, 0, 0, 0.4);
+      border-radius: 2px 0 0 0;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .tile.peel-bl::after {
+      content: '';
+      position: absolute;
+      bottom: -0.5px;
+      left: -0.5px;
+      width: var(--peel-size, 12px);
+      height: var(--peel-size, 12px);
+      background: linear-gradient(45deg, #08080b 38%, rgba(0,0,0,0.6) 41%, rgba(0,0,0,0.15) 45%, #d8d3c9 47%, #faf8f5 55%, #ffffff 80%);
+      box-shadow: 1px -1px 2px rgba(0, 0, 0, 0.4);
+      border-radius: 0 2px 0 0;
+      pointer-events: none;
+      z-index: 5;
     }
 
     .tile:hover {
@@ -1082,11 +1140,29 @@ export class SlidingPuzzle extends LitElement {
             const yPercent = (correctRow / (size - 1)) * 100;
             const bgPosition = `${xPercent}% ${yPercent}%`;
 
+            let peelClass = '';
+            let peelSize = '';
+            if (!isBlank) {
+              if (tile.id === 1) {
+                peelClass = 'peel-tr';
+                peelSize = '12px'; // Max
+              } else if (tile.id === 3) {
+                peelClass = 'peel-tl';
+                peelSize = '8px';  // Pulled back (Medium)
+              } else if (tile.id === 5) {
+                peelClass = 'peel-br';
+                peelSize = '10px'; // Pulled back (Medium-Large)
+              } else if ((size === 3 && tile.id === 6) || (size > 3 && tile.id === 8)) {
+                peelClass = 'peel-bl';
+                peelSize = '6px';  // Pulled back (Small)
+              }
+            }
+
             return html`
               <div 
-                class="tile ${hideBlank ? 'blank' : ''}" 
+                class="tile ${hideBlank ? 'blank' : ''} ${peelClass}" 
                 data-index=${tile.currentIndex}
-                style="background-image: url('${this.activeImage.url}'); background-position: ${bgPosition};"
+                style="background-image: url('${this.activeImage.url}'); background-position: ${bgPosition};${peelSize ? ` --peel-size: ${peelSize};` : ''}"
                 @pointerdown=${(e: PointerEvent) => this.handlePointerDown(e, tile)}
                 @dragstart=${(e: Event) => e.preventDefault()}
               ></div>
