@@ -7,16 +7,16 @@ interface PuzzleTile {
 }
 
 const SYNTH_IMAGES = [
-  { id: 'minimoog', name: 'Minimoog', url: '/assets/minimoog.png' },
-  { id: 'arpodysseymkiii', name: 'ARP Odyssey Mk III', url: '/assets/arpodysseymkiii.png' },
-  { id: 'dx7', name: 'Yamaha DX7', url: '/assets/dx7.png' },
-  { id: 'juno60', name: 'Roland Juno-60', url: '/assets/juno60.png' },
-  { id: 'tb303', name: 'Roland TB-303', url: '/assets/tb303.png' },
-  { id: 'tr808', name: 'Roland TR-808', url: '/assets/tr808.png' },
-  { id: 'tr909', name: 'Roland TR-909', url: '/assets/tr909.png' },
-  { id: 'cz1', name: 'Casio CZ-1', url: '/assets/cz1.png' },
-  { id: 'mpc60', name: 'Akai MPC60', url: '/assets/mpc60.png' },
-  { id: 'sp1200', name: 'E-mu SP-1200', url: '/assets/sp1200.png' }
+  { id: 'minimoog', name: 'Minimoog', url: './assets/minimoog.png' },
+  { id: 'arpodysseymkiii', name: 'ARP Odyssey Mk III', url: './assets/arpodysseymkiii.png' },
+  { id: 'dx7', name: 'Yamaha DX7', url: './assets/dx7.png' },
+  { id: 'juno60', name: 'Roland Juno-60', url: './assets/juno60.png' },
+  { id: 'tb303', name: 'Roland TB-303', url: './assets/tb303.png' },
+  { id: 'tr808', name: 'Roland TR-808', url: './assets/tr808.png' },
+  { id: 'tr909', name: 'Roland TR-909', url: './assets/tr909.png' },
+  { id: 'cz1', name: 'Casio CZ-1', url: './assets/cz1.png' },
+  { id: 'mpc60', name: 'Akai MPC60', url: './assets/mpc60.png' },
+  { id: 'sp1200', name: 'E-mu SP-1200', url: './assets/sp1200.png' }
 ];
 
 @customElement('sliding-puzzle')
@@ -31,6 +31,7 @@ export class SlidingPuzzle extends LitElement {
   @state() private hasWon = false;
   @state() private showPreview = false;
   @state() private isSolving = false;
+  @state() private gameMode: 'freeplay' | 'play' = 'freeplay';
 
   @query('.puzzle-grid') private gridElement!: HTMLElement;
 
@@ -108,6 +109,11 @@ export class SlidingPuzzle extends LitElement {
       color: var(--accent-orange);
       text-shadow: var(--shadow-glow-orange);
       line-height: 1.2;
+    }
+
+    .stat-value.cyan {
+      color: var(--accent-cyan);
+      text-shadow: var(--shadow-glow-cyan);
     }
 
     button {
@@ -303,11 +309,106 @@ export class SlidingPuzzle extends LitElement {
     }
 
     .tile:hover {
-      border-color: rgba(255, 94, 0, 0.4);
+      border-color: var(--tile-hover-border, rgba(255, 94, 0, 0.4));
       box-shadow: 
         inset 0 1px 0 rgba(255, 255, 255, 0.18),
-        0 0 10px rgba(255, 94, 0, 0.3),
+        0 0 10px var(--tile-hover-glow, rgba(255, 94, 0, 0.3)),
         0 6px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .puzzle-grid.locked .tile {
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .puzzle-grid.locked .tile:hover {
+      border-color: rgba(255, 255, 255, 0.06);
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 4px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .mode-selector {
+      display: flex;
+      width: 100%;
+      background-color: #0b0c0f;
+      border: 1px solid #20222a;
+      border-radius: var(--border-radius);
+      padding: 2px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .mode-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      padding: 0.5rem 0;
+      border-radius: calc(var(--border-radius) - 2px);
+      box-shadow: none;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .mode-btn:hover:not(.active) {
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .mode-btn.active.cyan {
+      color: #fff;
+      background: linear-gradient(180deg, #00f0ff 0%, #00b0cc 100%);
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 2px 8px rgba(0, 229, 255, 0.3);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    }
+
+    .mode-btn.active.orange {
+      color: #fff;
+      background: linear-gradient(180deg, #ff7c33 0%, var(--accent-orange) 100%);
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 2px 8px rgba(255, 94, 0, 0.3);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    }
+
+    .start-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(10, 11, 14, 0.75);
+      backdrop-filter: blur(2px);
+      z-index: 25;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    .start-overlay .start-btn {
+      font-size: 1.1rem;
+      padding: 0.8rem 2rem;
+      background: linear-gradient(180deg, #ff7c33 0%, var(--accent-orange) 100%);
+      box-shadow: 0 0 20px rgba(255, 94, 0, 0.4);
+      animation: pulse-start 2s infinite;
+    }
+
+    .start-hint {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    @keyframes pulse-start {
+      0% { box-shadow: 0 0 15px rgba(255, 94, 0, 0.3); transform: scale(1); }
+      50% { box-shadow: 0 0 25px rgba(255, 94, 0, 0.6); transform: scale(1.03); }
+      100% { box-shadow: 0 0 15px rgba(255, 94, 0, 0.3); transform: scale(1); }
     }
 
     .tile:active {
@@ -432,6 +533,12 @@ export class SlidingPuzzle extends LitElement {
     }
   }
 
+  private setMode(mode: 'freeplay' | 'play') {
+    if (this.gameMode === mode) return;
+    this.gameMode = mode;
+    this.resetPuzzle();
+  }
+
   private resetPuzzle() {
     this.stopTimer();
     this.isSolving = false;
@@ -521,7 +628,8 @@ export class SlidingPuzzle extends LitElement {
   private _boundPointerUp = (e: PointerEvent) => this.handlePointerUp(e);
 
   private handlePointerDown(e: PointerEvent, tile: PuzzleTile) {
-    if (!this.isPlaying || this.isSolving || this.hasWon) return;
+    const canMove = this.gameMode === 'freeplay' || (this.gameMode === 'play' && this.isPlaying);
+    if (!canMove || this.isSolving || this.hasWon) return;
     
     // Prevent default browser behaviors like text selection or image dragging
     e.preventDefault();
@@ -911,13 +1019,33 @@ export class SlidingPuzzle extends LitElement {
         <div class="stats">
           <div class="stat-display">
             <span class="stat-label">Moves</span>
-            <span class="stat-value">${String(this.moves).padStart(3, '0')}</span>
+            <span class="stat-value ${this.gameMode === 'freeplay' ? 'cyan' : ''}">${String(this.moves).padStart(3, '0')}</span>
           </div>
           <div class="stat-display">
             <span class="stat-label">Time</span>
-            <span class="stat-value">${this.formatTime(this.secondsElapsed)}</span>
+            <span class="stat-value ${this.gameMode === 'freeplay' ? 'cyan' : ''}">
+              ${this.gameMode === 'freeplay' ? 'FREE' : this.formatTime(this.secondsElapsed)}
+            </span>
           </div>
         </div>
+      </div>
+
+      <!-- Mode Selector Segmented Toggle -->
+      <div class="mode-selector">
+        <button 
+          class="mode-btn ${this.gameMode === 'freeplay' ? 'active cyan' : ''}" 
+          @click=${() => this.setMode('freeplay')}
+          ?disabled=${this.isSolving}
+        >
+          Freeplay
+        </button>
+        <button 
+          class="mode-btn ${this.gameMode === 'play' ? 'active orange' : ''}" 
+          @click=${() => this.setMode('play')}
+          ?disabled=${this.isSolving}
+        >
+          Play Mode
+        </button>
       </div>
 
       <div class="controls">
@@ -930,19 +1058,22 @@ export class SlidingPuzzle extends LitElement {
           <option value="4">4 x 4 (Classic)</option>
           <option value="5">5 x 5 (Expert)</option>
         </select>
-        
-        <button class="primary" @click=${this.shufflePuzzle} ?disabled=${this.isSolving}>
-          ${this.isPlaying ? 'Restart' : 'Shuffle & Play'}
-        </button>
       </div>
 
       <div class="board-wrapper">
         <div 
-          class="puzzle-grid" 
-          style="grid-template-columns: repeat(${size}, 1fr); grid-template-rows: repeat(${size}, 1fr); --bg-size: calc(${size} * 100% + (${size} - 1) * var(--grid-gap)) calc(${size} * 100% + (${size} - 1) * var(--grid-gap));"
+          class="puzzle-grid ${this.gameMode === 'play' && !this.isPlaying ? 'locked' : ''}" 
+          style="
+            grid-template-columns: repeat(${size}, 1fr); 
+            grid-template-rows: repeat(${size}, 1fr); 
+            --bg-size: calc(${size} * 100% + (${size} - 1) * var(--grid-gap)) calc(${size} * 100% + (${size} - 1) * var(--grid-gap));
+            --tile-hover-border: ${this.gameMode === 'freeplay' ? 'rgba(0, 229, 255, 0.5)' : 'rgba(255, 94, 0, 0.4)'};
+            --tile-hover-glow: ${this.gameMode === 'freeplay' ? 'rgba(0, 229, 255, 0.4)' : 'rgba(255, 94, 0, 0.3)'};
+          "
         >
           ${sortedTiles.map(tile => {
             const isBlank = tile.id === size * size - 1;
+            const hideBlank = isBlank && (this.gameMode === 'freeplay' || this.isPlaying);
             
             // Calculate slice position coordinates
             const correctRow = Math.floor(tile.id / size);
@@ -953,7 +1084,7 @@ export class SlidingPuzzle extends LitElement {
 
             return html`
               <div 
-                class="tile ${isBlank ? 'blank' : ''}" 
+                class="tile ${hideBlank ? 'blank' : ''}" 
                 data-index=${tile.currentIndex}
                 style="background-image: url('${this.activeImage.url}'); background-position: ${bgPosition};"
                 @pointerdown=${(e: PointerEvent) => this.handlePointerDown(e, tile)}
@@ -976,9 +1107,22 @@ export class SlidingPuzzle extends LitElement {
           </div>
           <button class="primary" style="margin-top: 0.5rem;" @click=${this.shufflePuzzle}>Play Again</button>
         </div>
+
+        ${this.gameMode === 'play' && !this.isPlaying && !this.hasWon ? html`
+          <div class="start-overlay">
+            <button class="primary start-btn" @click=${this.shufflePuzzle}>START GAME</button>
+            <div class="start-hint">Click to Shuffle & Play</div>
+          </div>
+        ` : ''}
       </div>
 
       <div class="game-actions">
+        <button 
+          @click=${this.gameMode === 'freeplay' ? this.resetPuzzle : this.shufflePuzzle} 
+          ?disabled=${this.isSolving || (this.gameMode === 'play' && !this.isPlaying)}
+        >
+          ${this.gameMode === 'freeplay' ? 'Reset' : 'Reshuffle'}
+        </button>
         <button 
           @click=${() => { this.showPreview = !this.showPreview; }} 
           ?disabled=${this.hasWon || this.isSolving}
@@ -987,13 +1131,13 @@ export class SlidingPuzzle extends LitElement {
         </button>
         <button 
           @click=${() => this.runSolver(false)} 
-          ?disabled=${!this.isPlaying || this.hasWon || this.isSolving}
+          ?disabled=${this.gameMode !== 'play' || !this.isPlaying || this.hasWon || this.isSolving}
         >
           Get Hint
         </button>
         <button 
           @click=${() => this.runSolver(true)} 
-          ?disabled=${!this.isPlaying || this.hasWon || this.isSolving}
+          ?disabled=${this.gameMode !== 'play' || !this.isPlaying || this.hasWon || this.isSolving}
         >
           Auto-Solve
         </button>
