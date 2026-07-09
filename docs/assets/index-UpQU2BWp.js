@@ -828,4 +828,4 @@
       text-shadow: var(--shadow-glow-orange);
     }
   `;b([m()],f.prototype,"gridSize",2);b([m()],f.prototype,"activeImage",2);b([m()],f.prototype,"tiles",2);b([m()],f.prototype,"blankIndex",2);b([m()],f.prototype,"moves",2);b([m()],f.prototype,"secondsElapsed",2);b([m()],f.prototype,"isPlaying",2);b([m()],f.prototype,"hasWon",2);b([m()],f.prototype,"showPreview",2);b([m()],f.prototype,"isSolving",2);b([m()],f.prototype,"gameMode",2);b([Be(".puzzle-grid")],f.prototype,"gridElement",2);f=b([Re("sliding-puzzle")],f);
-//# sourceMappingURL=index-CG_S9LeZ.js.map
+//# sourceMappingURL=index-UpQU2BWp.js.map
