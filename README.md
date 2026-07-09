@@ -31,7 +31,7 @@ Every synth in this puzzle has been lovingly illustrated and styled to match its
 * **Brand-Specific UI:** The header changes colors and typography dynamically to match the exact aesthetic and branding of the active synth.
 * **Physics & Feel:** Responsive drag-and-touch physics let you flick tiles smoothly.
 * **Solvers & Previews:** Stuck? Use the auto-solve helper or peek at the preview of the completed image.
-* **Live Stats:** Track your moves and elapsed time in real-time during your active game session. No data is tracked, saved, or sent anywhere else—everything runs entirely locally on your device.
+* **Live Stats:** Track your moves and elapsed time in real-time during your active game session. No data is tracked, saved, or sent anywhere else—everything runs entirely locally on your device
 
 ---
 
