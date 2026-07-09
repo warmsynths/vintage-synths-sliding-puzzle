@@ -46,6 +46,10 @@ export class SlidingPuzzle extends LitElement {
   private maxDragDistance = 0;
 
   static styles = css`
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
     :host {
       display: flex;
       flex-direction: column;
@@ -897,7 +901,6 @@ export class SlidingPuzzle extends LitElement {
 
   render() {
     const size = this.gridSize;
-    const sizePercent = 100 * size;
     
     // Sort tiles by current index so they render in correct grid placement order
     const sortedTiles = [...this.tiles].sort((a, b) => a.currentIndex - b.currentIndex);
@@ -936,7 +939,7 @@ export class SlidingPuzzle extends LitElement {
       <div class="board-wrapper">
         <div 
           class="puzzle-grid" 
-          style="grid-template-columns: repeat(${size}, 1fr); grid-template-rows: repeat(${size}, 1fr); --bg-size: ${sizePercent}% ${sizePercent}%;"
+          style="grid-template-columns: repeat(${size}, 1fr); grid-template-rows: repeat(${size}, 1fr); --bg-size: calc(${size} * 100% + (${size} - 1) * var(--grid-gap)) calc(${size} * 100% + (${size} - 1) * var(--grid-gap));"
         >
           ${sortedTiles.map(tile => {
             const isBlank = tile.id === size * size - 1;
