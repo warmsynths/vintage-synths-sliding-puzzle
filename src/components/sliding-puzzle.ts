@@ -69,6 +69,17 @@ export class SlidingPuzzle extends LitElement {
       gap: 1.5rem;
     }
 
+    .mobile-only {
+      display: none !important;
+    }
+
+    .bento-dashboard {
+      display: flex; 
+      flex-direction: column; 
+      width: 100%; 
+      gap: 1.5rem;
+    }
+    
     .header-panel {
       width: 100%;
       display: flex;
@@ -839,13 +850,14 @@ export class SlidingPuzzle extends LitElement {
 
     @media (max-width: 480px) {
       :host {
-        gap: 1rem;
+        gap: 0.75rem;
       }
       .header-panel {
         flex-direction: column;
         align-items: stretch;
-        gap: 0.75rem;
-        padding-bottom: 0.75rem;
+        gap: 0.5rem;
+        padding-bottom: 0.25rem;
+        border-bottom: none;
       }
       .active-synth-name {
         text-align: center;
@@ -854,35 +866,71 @@ export class SlidingPuzzle extends LitElement {
       .order-btn-wrapper {
         justify-content: center;
       }
-      .stats {
-        justify-content: center;
-        width: 100%;
-        gap: 0.5rem;
+      .desktop-only {
+        display: none !important;
       }
+      .mobile-only {
+        display: flex !important;
+      }
+      
+      .bento-dashboard {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas: 
+          "synth stats"
+          "size mode";
+        gap: 0.4rem;
+        width: 100%;
+        background-color: #0b0c0f;
+        padding: 0.5rem;
+        border-radius: var(--border-radius);
+        border: 1px solid #20222a;
+      }
+
+      .bento-dashboard .controls {
+        display: contents;
+      }
+      
+      .synth-select { grid-area: synth; height: 100%; }
+      .size-select { grid-area: size; height: 100%; }
+      .bento-dashboard .stats { 
+        grid-area: stats; 
+        display: flex; 
+        gap: 0.25rem;
+        width: 100%;
+      }
+      .bento-dashboard .mode-selector { 
+        grid-area: mode; 
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        background: transparent;
+        height: 100%;
+      }
+      
       .stat-display {
         flex: 1;
         min-width: 0;
-        padding: 0.25rem 0.5rem;
+        padding: 0.15rem 0;
+      }
+      .stat-label {
+        font-size: 0.55rem;
       }
       .stat-value {
-        font-size: 1.15rem;
+        font-size: 1rem;
       }
-      .mode-selector {
-        padding: 1px;
-      }
+      
       .mode-btn {
-        padding: 0.4rem 0;
-        font-size: 0.75rem;
+        padding: 0.25rem 0;
+        font-size: 0.7rem;
       }
-      .controls {
-        flex-direction: column;
-        gap: 0.5rem;
+      
+      select {
+        height: 100%;
+        padding: 0.25rem 1.5rem 0.25rem 0.5rem;
+        font-size: 0.7rem;
       }
-      .controls select,
-      .controls button {
-        width: 100%;
-        min-width: 0;
-      }
+
       .game-actions {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -1065,7 +1113,7 @@ export class SlidingPuzzle extends LitElement {
 
   // Peel pointer events
   private _boundPeelPointerMove = (e: PointerEvent) => this.handlePeelPointerMove(e);
-  private _boundPeelPointerUp = (e: PointerEvent) => this.handlePeelPointerUp(e);
+  private _boundPeelPointerUp = (_e: PointerEvent) => this.handlePeelPointerUp();
 
   private handlePointerDown(e: PointerEvent, tile: PuzzleTile) {
     const canMove = this.gameMode === 'freeplay' || (this.gameMode === 'play' && this.isPlaying);
@@ -1256,7 +1304,7 @@ export class SlidingPuzzle extends LitElement {
     this.tiles = [...this.tiles];
   }
 
-  private handlePeelPointerUp(e: PointerEvent) {
+  private handlePeelPointerUp() {
     if (!this.peelTile) return;
     
     window.removeEventListener('pointermove', this._boundPeelPointerMove);
@@ -1533,7 +1581,7 @@ export class SlidingPuzzle extends LitElement {
             <span class="led-indicator"></span>
           </div>
         </div>
-        <div class="stats">
+        <div class="stats desktop-only">
           <div class="stat-display">
             <span class="stat-label">Moves</span>
             <span class="stat-value ${this.gameMode === 'freeplay' ? 'cyan' : ''}">${String(this.moves).padStart(3, '0')}</span>
@@ -1547,34 +1595,50 @@ export class SlidingPuzzle extends LitElement {
         </div>
       </div>
 
-      <!-- Mode Selector Segmented Toggle -->
-      <div class="mode-selector">
-        <button 
-          class="mode-btn ${this.gameMode === 'freeplay' ? 'active cyan' : ''}" 
-          @click=${() => this.setMode('freeplay')}
-          ?disabled=${this.isSolving}
-        >
-          Freeplay
-        </button>
-        <button 
-          class="mode-btn ${this.gameMode === 'play' ? 'active orange' : ''}" 
-          @click=${() => this.setMode('play')}
-          ?disabled=${this.isSolving}
-        >
-          Play Mode
-        </button>
-      </div>
+      <div class="bento-dashboard">
+        
+        <div class="stats mobile-only">
+          <div class="stat-display">
+            <span class="stat-label">Moves</span>
+            <span class="stat-value ${this.gameMode === 'freeplay' ? 'cyan' : ''}">${String(this.moves).padStart(3, '0')}</span>
+          </div>
+          <div class="stat-display">
+            <span class="stat-label">Time</span>
+            <span class="stat-value ${this.gameMode === 'freeplay' ? 'cyan' : ''}">
+              ${this.gameMode === 'freeplay' ? 'FREE' : this.formatTime(this.secondsElapsed)}
+            </span>
+          </div>
+        </div>
 
-      <div class="controls">
-        <select @change=${this.handleImageChange} .value=${this.activeImage.id} ?disabled=${this.isSolving}>
-          ${SYNTH_IMAGES.map(img => html`<option value=${img.id}>${img.name}</option>`)}
-        </select>
+        <!-- Mode Selector Segmented Toggle -->
+        <div class="mode-selector">
+          <button 
+            class="mode-btn ${this.gameMode === 'freeplay' ? 'active cyan' : ''}" 
+            @click=${() => this.setMode('freeplay')}
+            ?disabled=${this.isSolving}
+          >
+            Freeplay
+          </button>
+          <button 
+            class="mode-btn ${this.gameMode === 'play' ? 'active orange' : ''}" 
+            @click=${() => this.setMode('play')}
+            ?disabled=${this.isSolving}
+          >
+            Play Mode
+          </button>
+        </div>
 
-        <select @change=${this.handleGridSizeChange} .value=${String(this.gridSize)} ?disabled=${this.isSolving}>
-          <option value="3">3 x 3 (Beginner)</option>
-          <option value="4">4 x 4 (Classic)</option>
-          <option value="5">5 x 5 (Expert)</option>
-        </select>
+        <div class="controls">
+          <select class="synth-select" @change=${this.handleImageChange} .value=${this.activeImage.id} ?disabled=${this.isSolving}>
+            ${SYNTH_IMAGES.map(img => html`<option value=${img.id}>${img.name}</option>`)}
+          </select>
+
+          <select class="size-select" @change=${this.handleGridSizeChange} .value=${String(this.gridSize)} ?disabled=${this.isSolving}>
+            <option value="3">3 x 3 (Beginner)</option>
+            <option value="4">4 x 4 (Classic)</option>
+            <option value="5">5 x 5 (Expert)</option>
+          </select>
+        </div>
       </div>
 
       <div class="board-wrapper">
